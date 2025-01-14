@@ -3,6 +3,8 @@ package org.example.expert.domain.manager.service;
 import lombok.RequiredArgsConstructor;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.exception.InvalidRequestException;
+import org.example.expert.domain.common.exception.ServerException;
+import org.example.expert.domain.common.logging.BaseLogService;
 import org.example.expert.domain.manager.dto.request.ManagerSaveRequest;
 import org.example.expert.domain.manager.dto.response.ManagerResponse;
 import org.example.expert.domain.manager.dto.response.ManagerSaveResponse;
@@ -28,6 +30,7 @@ public class ManagerService {
     private final ManagerRepository managerRepository;
     private final UserRepository userRepository;
     private final TodoRepository todoRepository;
+    private final BaseLogService baseLogService;
 
     @Transactional
     public ManagerSaveResponse saveManager(AuthUser authUser, long todoId, ManagerSaveRequest managerSaveRequest) {
@@ -47,8 +50,16 @@ public class ManagerService {
             throw new InvalidRequestException("일정 작성자는 본인을 담당자로 등록할 수 없습니다.");
         }
 
-        Manager newManagerUser = new Manager(managerUser, todo);
-        Manager savedManagerUser = managerRepository.save(newManagerUser);
+        Manager savedManagerUser;
+
+        try {
+            Manager newManagerUser = new Manager(managerUser, todo);
+            savedManagerUser = managerRepository.save(newManagerUser);
+        } catch (Exception e) {
+            throw new ServerException("Manager 저장 중 문제가 발생했습니다.");
+        } finally {
+            baseLogService.saveLog("담당자 등록 요청 : " + todoId + "번 게시글에 : " + managerUser.getNickname());
+        }
 
         return new ManagerSaveResponse(
                 savedManagerUser.getId(),
