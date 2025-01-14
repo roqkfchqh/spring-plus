@@ -6,15 +6,16 @@ import org.example.expert.client.WeatherClient;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.todo.dto.request.TodoSaveRequest;
+import org.example.expert.domain.todo.dto.request.TodoGetRequest;
 import org.example.expert.domain.todo.dto.request.TodoSearchRequest;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
 import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
+import org.example.expert.domain.todo.dto.response.TodoSearchResponse;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.todo.repository.TodoRepository;
 import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.entity.User;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,9 +51,7 @@ public class TodoService {
         );
     }
 
-    public Page<TodoResponse> getTodos(int page, int size, LocalDateTime startTime, LocalDateTime endTime, TodoSearchRequest dto) {
-        Pageable pageable = PageRequest.of(page - 1, size);
-
+    public Page<TodoResponse> getTodos(Pageable pageable, LocalDateTime startTime, LocalDateTime endTime, TodoGetRequest dto) {
         Page<Todo> todos = todoRepository.findTodosByConditions(
             dto.weather(),
             startTime,
@@ -85,6 +84,16 @@ public class TodoService {
                 new UserResponse(user.getId(), user.getEmail()),
                 todo.getCreatedAt(),
                 todo.getModifiedAt()
+        );
+    }
+
+    public Page<TodoSearchResponse> searchTodo(Pageable pageable, LocalDateTime startTime, LocalDateTime endTime, TodoSearchRequest dto){
+        return todoRepository.findTodosBySearch(
+            dto.title(),
+            dto.managerName(),
+            startTime,
+            endTime,
+            pageable
         );
     }
 }
