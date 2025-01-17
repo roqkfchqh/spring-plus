@@ -3,6 +3,7 @@ package org.example.expert.domain.user.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.expert.config.PasswordEncoder;
+import org.example.expert.domain.common.annotation.LogExecutionTime;
 import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.user.dto.request.UserChangePasswordRequest;
 import org.example.expert.domain.user.dto.response.UserResponse;
@@ -50,6 +51,7 @@ public class UserService {
         }
     }
 
+    @LogExecutionTime
     public List<UserResponse> searchUser(String nickname) {
         List<User> users = userRepository.findByNickname(nickname);
 
