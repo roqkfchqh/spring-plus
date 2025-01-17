@@ -15,12 +15,15 @@ public class ExecutionTimeLoggingAspect {
 
     @Around("@annotation(org.example.expert.domain.common.annotation.LogExecutionTime)")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
 
         Object proceed = joinPoint.proceed();
 
-        long executionTime = System.currentTimeMillis() - start;
-        logger.info("{} executed in {} ms", joinPoint.getSignature(), executionTime);
+        long executionTime = System.nanoTime() - start;
+        logger.info("{} executed in {} ns ({} ms)",
+            joinPoint.getSignature(),
+            executionTime,
+            executionTime / 1_000_000); // ns ms 동시 로깅
 
         return proceed;
     }
